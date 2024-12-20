@@ -1,0 +1,14 @@
+{
+  "canisters": {
+    "chrono": {
+      "type": "motoko",
+      "main": "./src/canister/router.mo"
+    }
+  },
+  "defaults": {
+    "build": {
+      "packtool": "mops sources"
+    }
+  },
+  "dfx": "0.24.2"
+}

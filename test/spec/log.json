@@ -1,0 +1,188 @@
+[
+  [
+    "1734603911 : OK : Updating pair canisters settings started"
+  ],
+  [
+    "1734603911 : OK : Updating pair canisters settings ended"
+  ],
+  [
+    "1734603911 : OK : Upgrade of pair canisters started"
+  ],
+  [
+    "1734603911 : OK : Upgrade of pair canisters ended"
+  ],
+  [
+    "1734603920 : New slices!!"
+  ],
+  [
+    "1734603920 : OK : Spawning slices {cur_slices = 0; now = 1_734_625_520; num_slices = 28}"
+  ],
+  [
+    "1734603920 : OK : Creating new pair canister {slice_from = 1_660_052_760; slice_to = 1_662_644_760}"
+  ],
+  [
+    "1734603920 : OK : Pair canister created lqy7q-dh777-77777-aaaaq-cai"
+  ],
+  [
+    "1734603920 : OK : Creating new pair canister {slice_from = 1_662_644_760; slice_to = 1_665_236_760}"
+  ],
+  [
+    "1734603923 : OK : Pair canister created lz3um-vp777-77777-aaaba-cai"
+  ],
+  [
+    "1734603923 : OK : Creating new pair canister {slice_from = 1_665_236_760; slice_to = 1_667_828_760}"
+  ],
+  [
+    "1734603926 : OK : Pair canister created l62sy-yx777-77777-aaabq-cai"
+  ],
+  [
+    "1734603926 : OK : Creating new pair canister {slice_from = 1_667_828_760; slice_to = 1_670_420_760}"
+  ],
+  [
+    "1734603926 : OK : Pair canister created ll5dv-z7777-77777-aaaca-cai"
+  ],
+  [
+    "1734603926 : OK : Creating new pair canister {slice_from = 1_670_420_760; slice_to = 1_673_012_760}"
+  ],
+  [
+    "1734603929 : OK : Pair canister created lm4fb-uh777-77777-aaacq-cai"
+  ],
+  [
+    "1734603929 : OK : Creating new pair canister {slice_from = 1_673_012_760; slice_to = 1_675_604_760}"
+  ],
+  [
+    "1734603932 : OK : Pair canister created lf7o5-cp777-77777-aaada-cai"
+  ],
+  [
+    "1734603932 : OK : Creating new pair canister {slice_from = 1_675_604_760; slice_to = 1_678_196_760}"
+  ],
+  [
+    "1734603932 : OK : Pair canister created lc6ij-px777-77777-aaadq-cai"
+  ],
+  [
+    "1734603932 : OK : Creating new pair canister {slice_from = 1_678_196_760; slice_to = 1_680_788_760}"
+  ],
+  [
+    "1734603935 : OK : Pair canister created kpqmh-a7777-77777-aaaea-cai"
+  ],
+  [
+    "1734603935 : OK : Creating new pair canister {slice_from = 1_680_788_760; slice_to = 1_683_380_760}"
+  ],
+  [
+    "1734603938 : OK : Pair canister created kirkt-nh777-77777-aaaeq-cai"
+  ],
+  [
+    "1734603938 : OK : Creating new pair canister {slice_from = 1_683_380_760; slice_to = 1_685_972_760}"
+  ],
+  [
+    "1734603938 : OK : Pair canister created kbsbp-3p777-77777-aaafa-cai"
+  ],
+  [
+    "1734603938 : OK : Creating new pair canister {slice_from = 1_685_972_760; slice_to = 1_688_564_760}"
+  ],
+  [
+    "1734603941 : OK : Pair canister created kgth3-wx777-77777-aaafq-cai"
+  ],
+  [
+    "1734603941 : OK : Creating new pair canister {slice_from = 1_688_564_760; slice_to = 1_691_156_760}"
+  ],
+  [
+    "1734603944 : OK : Pair canister created ktuww-x7777-77777-aaaga-cai"
+  ],
+  [
+    "1734603944 : OK : Creating new pair canister {slice_from = 1_691_156_760; slice_to = 1_693_748_760}"
+  ],
+  [
+    "1734603944 : OK : Pair canister created kuvqc-2h777-77777-aaagq-cai"
+  ],
+  [
+    "1734603944 : OK : Creating new pair canister {slice_from = 1_693_748_760; slice_to = 1_696_340_760}"
+  ],
+  [
+    "1734603947 : OK : Pair canister created k5w36-mp777-77777-aaaha-cai"
+  ],
+  [
+    "1734603947 : OK : Creating new pair canister {slice_from = 1_696_340_760; slice_to = 1_698_932_760}"
+  ],
+  [
+    "1734603950 : OK : Pair canister created k2x5k-bx777-77777-aaahq-cai"
+  ],
+  [
+    "1734603950 : OK : Creating new pair canister {slice_from = 1_698_932_760; slice_to = 1_701_524_760}"
+  ],
+  [
+    "1734603950 : OK : Pair canister created ihktc-s7777-77777-aaaia-cai"
+  ],
+  [
+    "1734603950 : OK : Creating new pair canister {slice_from = 1_701_524_760; slice_to = 1_704_116_760}"
+  ],
+  [
+    "1734603953 : OK : Pair canister created ialvw-7h777-77777-aaaiq-cai"
+  ],
+  [
+    "1734603953 : OK : Creating new pair canister {slice_from = 1_704_116_760; slice_to = 1_706_708_760}"
+  ],
+  [
+    "1734603956 : OK : Pair canister created iji6k-jp777-77777-aaaja-cai"
+  ],
+  [
+    "1734603956 : OK : Creating new pair canister {slice_from = 1_706_708_760; slice_to = 1_709_300_760}"
+  ],
+  [
+    "1734603956 : OK : Pair canister created iojy6-ex777-77777-aaajq-cai"
+  ],
+  [
+    "1734603956 : OK : Creating new pair canister {slice_from = 1_709_300_760; slice_to = 1_711_892_760}"
+  ],
+  [
+    "1734603959 : OK : Pair canister created i3ojt-f7777-77777-aaaka-cai"
+  ],
+  [
+    "1734603959 : OK : Creating new pair canister {slice_from = 1_711_892_760; slice_to = 1_714_484_760}"
+  ],
+  [
+    "1734603962 : OK : Pair canister created i4pph-ih777-77777-aaakq-cai"
+  ],
+  [
+    "1734603962 : OK : Creating new pair canister {slice_from = 1_714_484_760; slice_to = 1_717_076_760}"
+  ],
+  [
+    "1734603962 : OK : Pair canister created ivme3-6p777-77777-aaala-cai"
+  ],
+  [
+    "1734603962 : OK : Creating new pair canister {slice_from = 1_717_076_760; slice_to = 1_719_668_760}"
+  ],
+  [
+    "1734603965 : OK : Pair canister created isncp-tx777-77777-aaalq-cai"
+  ],
+  [
+    "1734603965 : OK : Creating new pair canister {slice_from = 1_719_668_760; slice_to = 1_722_260_760}"
+  ],
+  [
+    "1734603968 : OK : Pair canister created j7dgb-47777-77777-aaama-cai"
+  ],
+  [
+    "1734603968 : OK : Creating new pair canister {slice_from = 1_722_260_760; slice_to = 1_724_852_760}"
+  ],
+  [
+    "1734603968 : OK : Pair canister created jycav-rh777-77777-aaamq-cai"
+  ],
+  [
+    "1734603968 : OK : Creating new pair canister {slice_from = 1_724_852_760; slice_to = 1_727_444_760}"
+  ],
+  [
+    "1734603971 : OK : Pair canister created jrblj-hp777-77777-aaana-cai"
+  ],
+  [
+    "1734603971 : OK : Creating new pair canister {slice_from = 1_727_444_760; slice_to = 1_730_036_760}"
+  ],
+  [
+    "1734603974 : OK : Pair canister created jwan5-kx777-77777-aaanq-cai"
+  ],
+  [
+    "1734603974 : OK : Creating new pair canister {slice_from = 1_730_036_760; slice_to = 1_732_628_760}"
+  ],
+  [
+    "1734603974 : OK : Pair canister created jdh4q-l7777-77777-aaaoa-cai"
+  ]
+]
