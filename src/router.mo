@@ -19,7 +19,7 @@ import Map "mo:map/Map";
 
 module {
 
-    let SLICE_CYCLES = 40_000_000_000_000;
+    let SLICE_CYCLES = 40_000_000_000_001;
     let SLICE_ADDITIONAL_CONTROLLERS : [Principal] = [];
     let SLICE_CYCLES_REFILL_SEC = 21600; // 6 hours
 
@@ -195,7 +195,7 @@ module {
                     await ic.stop_canister({ canister_id = slice.canister_id });
 
                     // 2. Upgrade
-                    let SliceMgr = (system Slice.Slice)(#upgrade myActor);
+                    let SliceMgr = (system Slice.Slice)(#reinstall myActor);
 
                     ignore await SliceMgr(full_args);
 
@@ -273,15 +273,14 @@ module {
         ignore Timer.setTimer<system>(
             #seconds 1,
             func() : async () {
-
                 _eventlog.add("OK : Updating pair canisters settings started");
                 await update_slice_settings<system>();
                 _eventlog.add("OK : Updating pair canisters settings ended");
-
                 _eventlog.add("OK : Upgrade of pair canisters started");
                 await upgrade_slices<system>();
                 _eventlog.add("OK : Upgrade of pair canisters ended");
-
+                await spread_access<system>();
+                _eventlog.add("OK : Spread access complete");
             },
         );
 

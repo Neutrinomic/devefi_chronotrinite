@@ -3,6 +3,27 @@
     "chrono": {
       "type": "motoko",
       "main": "./src/canister/router.mo"
+    },
+    "slice": {
+      "type": "motoko",
+      "main": "./src/canister/slice.mo"
+    },
+    "test_client": {
+      "type": "motoko",
+      "main": "./src/canister/client.mo"
+     
+    },
+    "test_client2": {
+      "type": "motoko",
+      "main": "./src/canister/client.mo"
+    },
+    "test_client3": {
+      "type": "motoko",
+      "main": "./src/canister/client.mo"
+    },
+    "test_client4": {
+      "type": "motoko",
+      "main": "./src/canister/client.mo"
     }
   },
   "defaults": {
@@ -10,5 +31,5 @@
       "packtool": "mops sources"
     }
   },
-  "dfx": "0.24.2"
+  "dfx": "0.24.3"
 }

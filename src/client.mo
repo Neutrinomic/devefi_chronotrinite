@@ -44,6 +44,10 @@ module {
 
         var last_write : ?LastWrite = null;
 
+        public func chrono_query(req : [Slice.QueryReq]) : [Slice.QueryResp] {
+            synced_slice.chrono_query(req);
+        };
+
         public func insert(input : [Slice.InsertReq]) : () {
 
             for (req in input.vals()) {
@@ -120,7 +124,6 @@ module {
             };
 
             // Have to create a new write slice and cache it
-
             let ?target_slice = Array.find<(Principal, Nat32, Nat32)>(
                 mem.router_slices,
                 func(slice) : Bool = (ts >= slice.1 and ts < slice.2),
@@ -163,13 +166,38 @@ module {
             chrono_command : shared ([Slice.ChronoCommandReq]) -> async [Slice.ChronoCommandResp];
         };
 
+
         public func sync() : async () {
 
             // Repeatedly send write slices to the last known slice
+            
             for (write in Map.vals(mem.write)) {
                 write.frozen := true;
             };
 
+            
+            if (Map.size(mem.write) == 0) {
+                let last_slice = mem.router_slices[mem.router_slices.size() - 1];
+                let can = actor (Principal.toText(last_slice.0)) : SliceCan;
+
+                let resp = await can.chrono_command([
+                    #search(get_search_req()),
+                ]);
+                
+                for (resp_cmd in resp.vals()) {
+                    switch(resp_cmd) {
+                        case (#search(chans)) {
+                            for ((path, chan) in chans.vals()) {
+                                for (item in Slice.data_single_to_val(chan).vals()) {
+                                    synced_slice.insert_one(path, item.0, item.1);
+                                }
+                            }   
+                        };
+                        case (_) ();
+                    }
+                };
+
+            };
             for (write in Map.vals(mem.write)) {
 
                 write.attempts += 1;
@@ -181,11 +209,40 @@ module {
                 let req = write_slice.mem_to_input();
                 
                 let resp = await can.chrono_command([
-                    #insert(req)
+                    #insert(req),
+                    #search(get_search_req()),
                 ]);
+
+                for (resp_cmd in resp.vals()) {
+                    switch(resp_cmd) {
+                        case (#search(chans)) {
+                            for ((path, chan) in chans.vals()) {
+                                for (item in Slice.data_single_to_val(chan).vals()) {
+                                    synced_slice.insert_one(path, item.0, item.1);
+                                }
+                            }   
+                        };
+                        case (_) ();
+                    }
+                };
+
                 ignore Map.remove(mem.write, Map.nhash, write.id);
             };
 
+        };
+
+        private func get_search_req() : Slice.SearchReq {
+            let now = U.now_sec();
+            let req = Vector.new<Slice.ChannelSearchReq>();
+            for ((path,sub) in Map.entries(mem.subscriptions)) {
+                Vector.add<Slice.ChannelSearchReq>(req, {
+                    path = #exact(path);
+                    direction = #fwd;
+                    from = Slice.ts_to_tid(now - 10); // TODO: get last slice id and reduce 5sec
+                    limit = 100;
+                });
+            };
+            Vector.toArray(req);
         };
 
         ignore Timer.recurringTimer<system>(#seconds 3, sync);
@@ -238,3 +295,6 @@ module {
         };
     };
 };
+
+
+

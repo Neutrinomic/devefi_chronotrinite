@@ -1,0 +1,109 @@
+type TID = nat64;
+type Slice = 
+ service {
+   canister_info: () -> (CanisterInfo) query;
+   chrono_command: (vec ChronoCommandReq) -> (vec ChronoCommandResp);
+   chrono_query: (vec QueryReq) -> (vec QueryResp) query;
+   chrono_set_access: (ChronoSetAccess) -> ();
+   deposit_cycles: () -> ();
+ };
+type SearchResp = 
+ vec record {
+       C_Path;
+       ChronoChannelShared;
+     };
+type SearchReq = vec ChannelSearchReq;
+type QueryResp = variant {search: SearchResp;};
+type QueryReq = variant {search: SearchReq;};
+type InsertReq = 
+ record {
+   data: ChronoChannelShared;
+   path: C_Path;
+ };
+type InitArgs = 
+ record {
+   router: principal;
+   slice_from: nat32;
+   slice_to: nat32;
+ };
+type Direction = 
+ variant {
+   bwd;
+   fwd;
+ };
+type ChronoSetAccess = 
+ vec record {
+       principal;
+       C_Path;
+     };
+type ChronoEvent_6 = 
+ record {
+   TID;
+   text;
+ };
+type ChronoEvent_5 = 
+ record {
+   TID;
+   nat;
+ };
+type ChronoEvent_4 = 
+ record {
+   TID;
+   int;
+ };
+type ChronoEvent_3 = 
+ record {
+   TID;
+   float64;
+ };
+type ChronoEvent_2 = 
+ record {
+   TID;
+   blob;
+ };
+type ChronoEvent_1 = 
+ record {
+   TID;
+   vec record {
+         float64;
+         nat;
+       };
+ };
+type ChronoEvent = 
+ record {
+   TID;
+   vec float64;
+ };
+type ChronoCommandResp = 
+ variant {
+   insert;
+   search: SearchResp;
+ };
+type ChronoCommandReq = 
+ variant {
+   insert: vec InsertReq;
+   search: SearchReq;
+ };
+type ChronoChannelShared = 
+ variant {
+   AF: vec ChronoEvent;
+   AFN: vec ChronoEvent_1;
+   CANDID: vec ChronoEvent_2;
+   FLOAT: vec ChronoEvent_3;
+   INT: vec ChronoEvent_4;
+   NAT: vec ChronoEvent_5;
+   TEXT: vec ChronoEvent_6;
+ };
+type ChannelSearchReq = 
+ record {
+   direction: Direction;
+   from: nat64;
+   limit: nat;
+   path: variant {
+           exact: C_Path;
+           prefix: C_Path;
+         };
+ };
+type CanisterInfo = record {cycles: nat;};
+type C_Path = text;
+service : (InitArgs) -> Slice

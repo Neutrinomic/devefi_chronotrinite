@@ -28,7 +28,6 @@ module {
 
         public type TID = Nat64;
         public type C_Path = Text;
-        public type C_Candid_Id = Nat32;
 
         public type ChronoChannelMem = {
             #FLOAT : BTree.BTree<TID, Float>;
@@ -37,7 +36,7 @@ module {
             #AF : BTree.BTree<TID, [Float]>;
             #AFN : BTree.BTree<TID, [(Float, Nat)]>;
             #TEXT : BTree.BTree<TID, Text>;
-            #CANDID : BTree.BTree<TID, (C_Candid_Id, Blob)>;
+            #CANDID : BTree.BTree<TID, Blob>;
         };
 
         public type InitArgs = {

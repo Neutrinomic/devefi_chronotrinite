@@ -25,7 +25,6 @@ module {
 
     public type TID = VM.TID;
     public type C_Path = VM.C_Path;
-    public type C_Candid_Id = VM.C_Candid_Id;
     public type ChronoChannelMem = VM.ChronoChannelMem;
 
     type R<A, B> = Result.Result<A, B>;
@@ -43,7 +42,68 @@ module {
         #AF : [ChronoEvent<[Float]>];
         #AFN : [ChronoEvent<[(Float, Nat)]>];
         #TEXT : [ChronoEvent<Text>];
-        #CANDID : [ChronoEvent<(C_Candid_Id, Blob)>];
+        #CANDID : [ChronoEvent<Blob>];
+    };
+
+    public func data_single_to_val(input : ChronoChannelShared) : [(TID,Value)] {
+        switch (input) {
+            case (#FLOAT(events)) {
+                Array.map<ChronoEvent<Float>, (TID,Value)>(
+                    events,
+                    func((tid, payload)) {
+                        (tid, #FLOAT(payload));
+                    },
+                );
+            };
+            case (#NAT(events)) {
+                Array.map<ChronoEvent<Nat>, (TID,Value)>(
+                    events,
+                    func((tid, payload)) {
+                        (tid, #NAT(payload));
+                    },
+                );
+            };
+            case (#INT(events)) {
+                Array.map<ChronoEvent<Int>, (TID,Value)>(
+                    events,
+                    func((tid, payload)) {
+                        (tid, #INT(payload));
+                    },
+                );
+            };
+            case (#AF(events)) {
+                Array.map<ChronoEvent<[Float]>, (TID,Value)>(
+                    events,
+                    func((tid, payload)) {
+                        (tid, #AF(payload));
+                    },
+                );
+            };
+            case (#AFN(events)) {
+                Array.map<ChronoEvent<[(Float, Nat)]>, (TID,Value)>(
+                    events,
+                    func((tid, payload)) {
+                        (tid, #AFN(payload));
+                    },
+                );
+            };
+            case (#TEXT(events)) {
+                Array.map<ChronoEvent<Text>, (TID,Value)>(
+                    events,
+                    func((tid, payload)) {
+                        (tid, #TEXT(payload));
+                    },
+                );
+            };
+            case (#CANDID(events)) {
+                Array.map<ChronoEvent<Blob>, (TID,Value)>(
+                    events,
+                    func((tid, payload)) {
+                        (tid, #CANDID(payload));
+                    },
+                );
+            };
+        };
     };
 
     public type Value = {
@@ -53,7 +113,7 @@ module {
         #AF : [Float];
         #AFN : [(Float, Nat)];
         #TEXT : Text;
-        #CANDID : (C_Candid_Id, Blob);
+        #CANDID : Blob;
     };
 
     public type InsertReq = {
@@ -104,7 +164,7 @@ module {
             case (#AF(arr)) arr.size() * 8;
             case (#AFN(arr)) arr.size() * 16;
             case (#TEXT(txt)) txt.size() * 2;
-            case (#CANDID(_, blob)) blob.size();
+            case (#CANDID(blob)) blob.size();
         };
     };
 
@@ -134,6 +194,32 @@ module {
                 );
             };
             Vector.toArray(rez);
+        };
+
+        public func insert_one(input : InsertOne) : () {
+
+            let (path, tid, value) = input;
+            if (tid < _slice_from_tid or tid >= _slice_to_tid) Debug.trap("TID out of slice range");
+            let chan = get_create_channel(path, func() = new_channel(value));
+
+            add_to_channel(chan, tid, value);
+
+        };
+
+        var last_channel : ?(C_Path, ChronoChannelMem) = null;
+        private func get_create_channel(path : Text, create_new : () -> ChronoChannelMem) : ChronoChannelMem {
+            ignore do ? { if (last_channel!.0 == path) return last_channel!.1 };
+
+            let chan = switch (BTree.get(mem.main, Text.compare, path)) {
+                case (?found) found;
+                case (null) {
+                    let new_chan : ChronoChannelMem = create_new();
+                    ignore BTree.insert(mem.main, Text.compare, path, new_chan);
+                    new_chan;
+                };
+            };
+            last_channel := ?(path, chan);
+            chan;
         };
 
         public func chrono_set_access(caller : Principal, req : ChronoSetAccess) : () {
@@ -166,9 +252,11 @@ module {
 
         public func insert(caller : ?Principal, input : [InsertReq]) : () {
             for (req in input.vals()) {
-                ignore do ? { if (not has_access(caller!, req.path)) Debug.trap("Access denied"); };
+                ignore do ? {
+                    if (not has_access(caller!, req.path)) Debug.trap("Access denied");
+                };
 
-                switch(req.data) {
+                switch (req.data) {
                     case (#FLOAT(arr)) {
                         for (x in arr.vals()) {
                             insert_one((req.path, x.0, #FLOAT(x.1)));
@@ -219,7 +307,7 @@ module {
                         Vector.add(rez_channels, (p, get_channel_results(x, chan.direction, chan.from, chan.limit)));
                     };
                     case (#prefix(p)) {
-                        let g = BTree.scanLimit(mem.main, Text.compare, p, "~", #fwd, 200);
+                        let g = BTree.scanLimit(mem.main, Text.compare, p, p # "~", #fwd, 200);
                         for (x in g.results.vals()) {
                             Vector.add(rez_channels, (x.0, get_channel_results(x.1, chan.direction, chan.from, chan.limit)));
                         };
@@ -238,6 +326,8 @@ module {
             };
         };
 
+    
+
         private func get_channel_results<A>(chan : ChronoChannelMem, direction : BTree.Direction, from : Nat64, limit : Nat) : ChronoChannelShared {
 
             switch (chan) {
@@ -247,7 +337,7 @@ module {
                 case (#AF(btree)) #AF(get_channel_results_inner<[Float]>(btree, direction, from, limit));
                 case (#AFN(btree)) #AFN(get_channel_results_inner<[(Float, Nat)]>(btree, direction, from, limit));
                 case (#TEXT(btree)) #TEXT(get_channel_results_inner<Text>(btree, direction, from, limit));
-                case (#CANDID(btree)) #CANDID(get_channel_results_inner<(C_Candid_Id, Blob)>(btree, direction, from, limit));
+                case (#CANDID(btree)) #CANDID(get_channel_results_inner<Blob>(btree, direction, from, limit));
             };
 
         };
@@ -265,42 +355,16 @@ module {
             Vector.toArray(rez);
         };
 
-        private func new_channel( x : Value ) : ChronoChannelMem {
-            switch(x) {
+        private func new_channel(x : Value) : ChronoChannelMem {
+            switch (x) {
                 case (#FLOAT(_)) #FLOAT(BTree.init<TID, Float>(?32));
                 case (#NAT(_)) #NAT(BTree.init<TID, Nat>(?32));
                 case (#INT(_)) #INT(BTree.init<TID, Int>(?32));
                 case (#AF(_)) #AF(BTree.init<TID, [Float]>(?32));
                 case (#AFN(_)) #AFN(BTree.init<TID, [(Float, Nat)]>(?32));
                 case (#TEXT(_)) #TEXT(BTree.init<TID, Text>(?32));
-                case (#CANDID(_)) #CANDID(BTree.init<TID, (C_Candid_Id, Blob)>(?32));
-            }
-        };
-
-        public func insert_one(input : InsertOne) : () {
-            
-            let (path, tid, value) = input;
-            if (tid < _slice_from_tid or tid >= _slice_to_tid) Debug.trap("TID out of slice range");
-            let chan = get_create_channel(path, func () = new_channel(value));
-
-            add_to_channel(chan, tid, value);
-             
-        };
-
-        var last_channel : ?(C_Path, ChronoChannelMem) = null;
-        private func get_create_channel(path : Text, create_new : () -> ChronoChannelMem) : ChronoChannelMem {
-            ignore do ? { if (last_channel!.0 == path) return last_channel!.1 };
-
-            let chan = switch (BTree.get(mem.main, Text.compare, path)) {
-                case (?found) found;
-                case (null) {
-                    let new_chan : ChronoChannelMem = create_new();
-                    ignore BTree.insert(mem.main, Text.compare, path, new_chan);
-                    new_chan;
-                };
+                case (#CANDID(_)) #CANDID(BTree.init<TID, Blob>(?32));
             };
-            last_channel := ?(path, chan);
-            chan;
         };
 
         public func add_to_channel(channel : ChronoChannelMem, tid : TID, value : Value) : () {
@@ -380,8 +444,8 @@ module {
                         };
                     };
                     case (#CANDID(events)) {
-                        let eventsArray = Vector.new<ChronoEvent<(C_Candid_Id, Blob)>>();
-                        for ((tid, payload) in BTree.entries<TID, (C_Candid_Id, Blob)>(events)) {
+                        let eventsArray = Vector.new<ChronoEvent<Blob>>();
+                        for ((tid, payload) in BTree.entries<TID, Blob>(events)) {
                             Vector.add(eventsArray, (tid, payload));
                         };
                         {

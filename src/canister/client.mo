@@ -1,4 +1,5 @@
 import C "../../src/client";
+import S "../../src/slice";
 
 shared ({caller}) actor class  Slice({router: Principal})  {
 
@@ -8,6 +9,14 @@ shared ({caller}) actor class  Slice({router: Principal})  {
     
     public shared func insert(input: [C.InsertReq]) : async () {
         chrono.insert(input);
+    };
+
+    public shared func subscribe(path: Text) : async () {
+        chrono.subscribe(path, 400);
+    };
+
+    public query func chrono_query(req: [S.QueryReq]) : async [S.QueryResp] {
+        chrono.chrono_query(req);
     };
 
 }

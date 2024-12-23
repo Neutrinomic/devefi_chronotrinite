@@ -1,5 +1,15 @@
 {
   "chrono": {
     "ic": "hik73-dyaaa-aaaal-qsaqa-cai"
-  }
+  },
+  "test_client": {
+    "ic": "naxvo-naaaa-aaaal-qsbkq-cai"
+  },
+  "test_client2": {
+    "ic": "nju6s-3iaaa-aaaal-qsbla-cai"
+  },
+  "test_client3": {
+    "ic": "u7xbi-faaaa-aaaas-alt7q-cai"
+  },
+  "test_client4": {}
 }
