@@ -98,7 +98,7 @@ module {
 
             let num_slices = dur / SLICE_TIMESPAN + 1;
             let cur_slices = Nat32.fromNat(Vector.size(mem.slices));
-            _eventlog.add("OK : Spawning slices " # debug_show ({ now; num_slices; cur_slices }));
+            _eventlog.add("OK : Spawning slices? " # debug_show ({ now; num_slices; cur_slices }));
 
             if (num_slices == cur_slices) return;
 
@@ -118,7 +118,10 @@ module {
                             },
                         )
                     )
-                ) continue create_missing;
+                ) {
+                    i += 1;
+                    continue create_missing;
+                };
 
                 let initArg : SliceInitArgs = {
                     slice_from = slice_from;
