@@ -10,7 +10,7 @@ import Option "mo:base/Option";
 import Array "mo:base/Array";
 import U "./utils";
 import Timer "mo:base/Timer";
-
+import Error "mo:base/Error";
 module {
 
     public module Mem {
@@ -30,12 +30,12 @@ module {
 
     public class ChronoClient<system>({ xmem : MU.MemShell<VM.Mem> }) {
         let mem = MU.access(xmem);
+        mem.synced_slice.inner := null;
+        // let synced_slice = Slice.ChronoSlice({ xmem = mem.synced_slice });
 
-        let synced_slice = Slice.ChronoSlice({ xmem = mem.synced_slice });
-
-        public func search(req : Slice.SearchReq) : Slice.SearchResp {
-            synced_slice.search(req);
-        };
+        // public func search(req : Slice.SearchReq) : Slice.SearchResp {
+        //     synced_slice.search(req);
+        // };
 
         type LastWrite = {
             slice : Slice.ChronoSlice;
@@ -44,9 +44,9 @@ module {
 
         var last_write : ?LastWrite = null;
 
-        public func chrono_query(req : [Slice.QueryReq]) : [Slice.QueryResp] {
-            synced_slice.chrono_query(req);
-        };
+        // public func chrono_query(req : [Slice.QueryReq]) : [Slice.QueryResp] {
+        //     synced_slice.chrono_query(req);
+        // };
 
         public func insert(input : [Slice.InsertReq]) : () {
 
@@ -93,7 +93,7 @@ module {
 
         public func insert_one(input : InsertOne) : () {
             if (mem.router_slices.size() == 0) Debug.trap("No router slices available");
-            synced_slice.insert_one(input);
+            // synced_slice.insert_one(input);
 
             let input_size_bytes = Slice.get_input_size_bytes(input);
 
@@ -166,67 +166,87 @@ module {
             chrono_command : shared ([Slice.ChronoCommandReq]) -> async [Slice.ChronoCommandResp];
         };
 
+        let READ_FROM_MASTER_WITHOUT_WRITE = false;
 
         public func sync() : async () {
 
             // Repeatedly send write slices to the last known slice
-            
+            // Debug.print("1) Syncing");
             for (write in Map.vals(mem.write)) {
                 write.frozen := true;
             };
 
-            
-            if (Map.size(mem.write) == 0) {
-                let last_slice = mem.router_slices[mem.router_slices.size() - 1];
-                let can = actor (Principal.toText(last_slice.0)) : SliceCan;
+            // // Debug.print("2) Syncing");
+            // if (READ_FROM_MASTER_WITHOUT_WRITE) {
+            //     try {
+            //     if (Map.size(mem.write) == 0) {
+            //         let last_slice = mem.router_slices[mem.router_slices.size() - 1];
+            //         let can = actor (Principal.toText(last_slice.0)) : SliceCan;
 
-                let resp = await can.chrono_command([
-                    #search(get_search_req()),
-                ]);
-                
-                for (resp_cmd in resp.vals()) {
-                    switch(resp_cmd) {
-                        case (#search(chans)) {
-                            for ((path, chan) in chans.vals()) {
-                                for (item in Slice.data_single_to_val(chan).vals()) {
-                                    synced_slice.insert_one(path, item.0, item.1);
-                                }
-                            }   
-                        };
-                        case (_) ();
-                    }
+            //         let resp = await can.chrono_command([
+            //             #search(get_search_req()),
+            //         ]);
+                    
+            //         for (resp_cmd in resp.vals()) {
+            //             switch(resp_cmd) {
+            //                 case (#search(chans)) {
+            //                     for ((path, chan) in chans.vals()) {
+            //                         for (item in Slice.data_single_to_val(chan).vals()) {
+            //                             synced_slice.insert_one(path, item.0, item.1);
+            //                         }
+            //                     }   
+            //                 };
+            //                 case (_) ();
+            //             }
+            //         };
+            //     };
+            //     } catch (e) {
+            //         Debug.print("Error read syncing : " # debug_show(Error.message(e)));
+            //     };
+            // };
+
+            try {
+                label write_loop for (write in Map.vals(mem.write)) {
+                    // Debug.print("3) Writing attempt" # debug_show({
+                    //     attempts = write.attempts;
+                    //     last_attempt = write.last_attempt;
+                    //     diff = U.now_sec() - write.last_attempt;
+                    //     size = write.size / 1024 / 1024; // in MB
+                    // }));
+                    // if (write.attempts > 5) continue write_loop;
+                    // if (write.last_attempt + 120 < U.now_sec()) continue write_loop;
+
+                    write.attempts += 1;
+                    write.last_attempt := U.now_sec();
+
+                    let can = actor (Principal.toText(write.slice_canister)) : SliceCan;
+                    let write_slice = Slice.ChronoSlice({ xmem = write.slice });
+
+                    let req = write_slice.mem_to_input();
+                    // Debug.print("4) Writing");
+                    ignore await can.chrono_command([
+                        #insert(req),
+                        // #search(get_search_req()),
+                    ]);
+
+                    // for (resp_cmd in resp.vals()) {
+                    //     switch(resp_cmd) {
+                    //         case (#search(chans)) {
+                    //             for ((path, chan) in chans.vals()) {
+                    //                 for (item in Slice.data_single_to_val(chan).vals()) {
+                    //                     synced_slice.insert_one(path, item.0, item.1);
+                    //                 }
+                    //             }
+                    //         };
+                    //         case (_) ();
+                    //     }
+                    // };
+
+                    ignore Map.remove(mem.write, Map.nhash, write.id);
+                    break write_loop;
                 };
-
-            };
-            for (write in Map.vals(mem.write)) {
-
-                write.attempts += 1;
-                write.last_attempt := U.now_sec();
-
-                let can = actor (Principal.toText(write.slice_canister)) : SliceCan;
-                let write_slice = Slice.ChronoSlice({ xmem = write.slice });
-
-                let req = write_slice.mem_to_input();
-                
-                let resp = await can.chrono_command([
-                    #insert(req),
-                    #search(get_search_req()),
-                ]);
-
-                for (resp_cmd in resp.vals()) {
-                    switch(resp_cmd) {
-                        case (#search(chans)) {
-                            for ((path, chan) in chans.vals()) {
-                                for (item in Slice.data_single_to_val(chan).vals()) {
-                                    synced_slice.insert_one(path, item.0, item.1);
-                                }
-                            }   
-                        };
-                        case (_) ();
-                    }
-                };
-
-                ignore Map.remove(mem.write, Map.nhash, write.id);
+            } catch (e) {
+                Debug.print("Error write syncing: " # debug_show(Error.message(e)));
             };
 
         };
@@ -245,7 +265,7 @@ module {
             Vector.toArray(req);
         };
 
-        ignore Timer.recurringTimer<system>(#seconds 3, sync);
+        ignore Timer.recurringTimer<system>(#seconds 20, sync);
 
         type RouterCan = actor {
             get_slices : shared () -> async [(Principal, Nat32, Nat32)];

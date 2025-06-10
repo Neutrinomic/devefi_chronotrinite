@@ -81,7 +81,7 @@ module {
             subscriptions = Map.new<Text, Subscription>();
             synced_slice = ChronoSlice.new({
                 slice_from = 0;
-                slice_to = 4294967295; // February 7, 2106 (Fix it later ;)
+                slice_to = 4294967295; // February 7, 2106 (Fix it later)
                 router;
             });
             write = Map.new<Nat, WriteSlice>();
