@@ -92,7 +92,7 @@ module {
         };
 
         public func insert_one(input : InsertOne) : () {
-            if (mem.router_slices.size() == 0) Debug.trap("No router slices available");
+            if (mem.router_slices.size() == 0) return Debug.print("No router slices available");
             // synced_slice.insert_one(input);
 
             let input_size_bytes = Slice.get_input_size_bytes(input);
@@ -127,7 +127,7 @@ module {
             let ?target_slice = Array.find<(Principal, Nat32, Nat32)>(
                 mem.router_slices,
                 func(slice) : Bool = (ts >= slice.1 and ts < slice.2),
-            ) else Debug.trap("No avail router slice found!");
+            ) else return Debug.print("No avail router slice found!");
 
             let id = mem.next_local_write_id;
             mem.next_local_write_id += 1;
