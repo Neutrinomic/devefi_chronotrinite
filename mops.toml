@@ -1,6 +1,6 @@
 [package]
 name = "chronotrinite"
-version = "0.1.1"
+version = "0.1.2"
 description = "Neutrinite DeVeFi Chronotrinite"
 repository = "https://github.com/Neutrinomic/devefi_chronotrinite"
 keywords = [ ]
